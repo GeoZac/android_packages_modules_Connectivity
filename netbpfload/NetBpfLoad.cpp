@@ -289,13 +289,11 @@ int main(int argc, char** argv, char * const envp[]) {
     }
 
     if (isAtLeastT && !android::bpf::isAtLeastKernelVersion(4, 9, 0)) {
-        ALOGE("Android T requires kernel 4.9.");
-        return 1;
+        ALOGW("Android T requires kernel 4.9.");
     }
 
     if (isAtLeastU && !android::bpf::isAtLeastKernelVersion(4, 14, 0)) {
-        ALOGE("Android U requires kernel 4.14.");
-        return 1;
+        ALOGW("Android U requires kernel 4.14.");
     }
 
     if (isAtLeastV && !android::bpf::isAtLeastKernelVersion(4, 19, 0)) {
@@ -353,12 +351,14 @@ int main(int argc, char** argv, char * const envp[]) {
         //  kernel does not have CONFIG_BPF_JIT=y)
         // BPF_JIT is required by R VINTF (which means 4.14/4.19/5.4 kernels),
         // but 4.14/4.19 were released with P & Q, and only 5.4 is new in R+.
-        if (writeProcSysFile("/proc/sys/net/core/bpf_jit_enable", "1\n")) return 1;
+        if (writeProcSysFile("/proc/sys/net/core/bpf_jit_enable", "1\n") &&
+            android::bpf::isAtLeastKernelVersion(4, 14, 0)) return 1;
 
         // Enable JIT kallsyms export for privileged users only
         // (Note: this (open) will fail with ENOENT 'No such file or directory' if
         //  kernel does not have CONFIG_HAVE_EBPF_JIT=y)
-        if (writeProcSysFile("/proc/sys/net/core/bpf_jit_kallsyms", "1\n")) return 1;
+        if (writeProcSysFile("/proc/sys/net/core/bpf_jit_kallsyms", "1\n") &&
+            android::bpf::isAtLeastKernelVersion(4, 14, 0)) return 1;
     }
 
     // Create all the pin subdirectories
